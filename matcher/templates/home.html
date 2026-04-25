@@ -58,6 +58,16 @@
 
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
+            {% if not user.is_authenticated %}
+<p class="text-danger text-center">
+    Login to use full features
+</p>
+{% endif %}
+            {% if not user.is_authenticated %}
+<div class="alert alert-warning text-center">
+    Please login to use the matcher
+</div>
+{% endif %}
 
             <div class="mb-3">
                 <label class="form-label">Upload Resume</label>
@@ -70,12 +80,32 @@
             </div>
 
             <div class="text-center">
-                <button class="btn btn-custom px-4 py-2">Analyze</button>
+               <button id="analyzeBtn" class="btn btn-custom px-4 py-2">
+    Analyze
+</button> 
             </div>
         </form>
+        {% if score %}
+<div class="mt-4">
+    <h4 class="text-center">Match Score: {{ score }}%</h4>
+
+    <div class="progress">
+        <div class="progress-bar bg-success"
+            style="width: {{ score }}%;">
+        </div>
+    </div>
+</div>
+{% endif %}
 
     </div>
 </div>
 
 </body>
+<script>
+document.querySelector("form").addEventListener("submit", function() {
+    const btn = document.getElementById("analyzeBtn");
+    btn.innerText = "Analyzing...";
+    btn.disabled = true;
+});
+</script>
 </html>
