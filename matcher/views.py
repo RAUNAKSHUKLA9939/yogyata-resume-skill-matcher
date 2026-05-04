@@ -26,10 +26,17 @@ def home(request):
 
 def signup_view(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username')
+        password = request.POST.get('password')
 
-        User.objects.create_user(username=username, password=password)
+        # ✅ check if username already exists
+        if User.objects.filter(username=username).exists():
+            return render(request, 'signup.html', {
+                'error': 'Username already exists'
+            })
+
+        # ✅ create new user
+        user = User.objects.create_user(username=username, password=password)
         return redirect('login')
 
     return render(request, 'signup.html')
