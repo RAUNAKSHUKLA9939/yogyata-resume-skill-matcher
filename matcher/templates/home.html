@@ -1,151 +1,374 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Yogyata</title>
+
+    <title>Yogyata AI Skill Matcher</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-     <style>
-    body {
-        background: linear-gradient(135deg, #1f4037, #99f2c8);
-        min-height: 100vh;
-        font-family: 'Segoe UI', sans-serif;
-    }
+    <style>
 
-    .navbar {
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(10px);
-    }
+        body{
+            background: linear-gradient(135deg,#141e30,#243b55);
+            min-height:100vh;
+            font-family:Arial;
+            color:white;
+            transition:0.5s;
+        }
 
-    .navbar-brand {
-        font-weight: bold;
-        font-size: 22px;
-        letter-spacing: 1px;
-    }
+        .dark-mode{
+            background:black !important;
+        }
 
-    .card {
-        border-radius: 20px;
-        padding: 30px;
-        border: none;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(15px);
-        transition: 0.3s;
-    }
+        .navbar{
+            box-shadow:0px 0px 10px rgba(0,0,0,0.5);
+        }
 
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
+        .main-box{
+            background:white;
+            color:black;
+            padding:40px;
+            border-radius:20px;
+            margin-top:40px;
+            margin-bottom:40px;
+            box-shadow:0px 0px 20px rgba(0,0,0,0.5);
+        }
 
-    h2 {
-        font-weight: bold;
-        color: #333;
-    }
+        .title{
+            text-align:center;
+            font-size:42px;
+            font-weight:bold;
+            color:#0d6efd;
+            margin-bottom:30px;
+        }
 
-    .form-control {
-        border-radius: 10px;
-        padding: 10px;
-    }
+        .btn-custom{
+            width:100%;
+            padding:14px;
+            font-size:20px;
+            border-radius:12px;
+            font-weight:bold;
+        }
 
-    .btn-custom {
-        background: linear-gradient(45deg, #ff512f, #dd2476);
-        border: none;
-        color: white;
-        font-weight: bold;
-        transition: 0.3s;
-        border-radius: 25px;
-    }
+        .result-box{
+            background:#f8f9fa;
+            padding:30px;
+            border-radius:20px;
+            margin-top:40px;
+        }
 
-    .btn-custom:hover {
-        transform: scale(1.08);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    }
+        .score{
+            font-size:65px;
+            font-weight:bold;
+            color:green;
+        }
 
-    .progress {
-        height: 20px;
-        border-radius: 20px;
-        margin-top: 10px;
-    }
+        .section-title{
+            font-size:24px;
+            font-weight:bold;
+            margin-top:25px;
+            color:#0d6efd;
+        }
 
-    .progress-bar {
-        background: linear-gradient(90deg, #00c6ff, #0072ff);
-    }
-</style>
+        .badge{
+            font-size:16px;
+            padding:10px 15px;
+        }
+
+    </style>
+
 </head>
 
-<body>
+<body id="body">
 
 <!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-dark px-4">
-    <a class="navbar-brand" href="#">Yogyata</a>
 
-    <div class="ms-auto">
-        {% if user.is_authenticated %}
-            <span class="me-3">👋 {{ user.username }}</span>
-            <a href="{% url 'logout' %}" class="btn btn-danger btn-sm">Logout</a>
-        {% else %}
-            <a href="{% url 'login' %}" class="btn btn-light btn-sm">Login</a>
-            <a href="{% url 'signup' %}" class="btn btn-warning btn-sm">Signup</a>
-        {% endif %}
+<nav class="navbar navbar-dark bg-dark navbar-expand-lg">
+
+    <div class="container">
+
+        <a class="navbar-brand fw-bold fs-3" href="/">
+            YOGYATA
+        </a>
+
+        <div class="ms-auto">
+
+            <button onclick="toggleMode()" class="btn btn-warning me-3">
+                Toggle Mode
+            </button>
+
+            <span class="text-white me-3">
+                Welcome, {{ request.user.username }}
+            </span>
+
+            <a href="/logout/" class="btn btn-danger">
+                Logout
+            </a>
+
+        </div>
+
     </div>
+
 </nav>
 
-<!-- MAIN CARD -->
-<div class="container mt-5">
-    <div class="card shadow-lg bg-white text-dark">
+<!-- MAIN -->
 
-        <h2 class="text-center mb-3">🚀 Yogyata AI Matcher</h2>
-<p class="text-center text-muted">Upload your resume & match with job instantly</p> 
+<div class="container">
 
-        <form method="POST" enctype="multipart/form-data">
+    <div class="main-box">
+
+        <h1 class="title">
+            AI RESUME & SKILL MATCHER
+        </h1>
+
+        <!-- FORM -->
+
+        <form method="POST">
+
             {% csrf_token %}
-            {% if not user.is_authenticated %}
-<p class="text-danger text-center">
-    Login to use full features
-</p>
-{% endif %}
-            {% if not user.is_authenticated %}
-<div class="alert alert-warning text-center">
-    Please login to use the matcher
-</div>
-{% endif %}
 
-            <div class="mb-3">
-                <label class="form-label">Upload Resume</label>
-                <input type="file" name="resume" class="form-control">
+            <div class="mb-4">
+
+                <label class="form-label fw-bold">
+                    Your Skills
+                </label>
+
+                <textarea
+                    name="skills"
+                    class="form-control"
+                    rows="3"
+                    placeholder="Python, HTML, CSS, Django"
+                >{{ user_skills }}</textarea>
+
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Job Description</label>
-                <textarea name="job_desc" class="form-control" rows="5"></textarea>
+            <div class="mb-4">
+
+                <label class="form-label fw-bold">
+                    Job Role
+                </label>
+
+                <input
+                    type="text"
+                    name="job_role"
+                    class="form-control"
+                    value="{{ job_role }}"
+                >
+
             </div>
+
+            <div class="mb-4">
+
+                <label class="form-label fw-bold">
+                    Company Name
+                </label>
+
+                <input
+                    type="text"
+                    name="company"
+                    class="form-control"
+                    value="{{ company }}"
+                >
+
+            </div>
+
+            <div class="mb-4">
+
+                <label class="form-label fw-bold">
+                    Job Description
+                </label>
+
+                <textarea
+                    name="job_desc"
+                    class="form-control"
+                    rows="5"
+                >{{ job_desc }}</textarea>
+
+            </div>
+
+            <div class="mb-4">
+
+                <label class="form-label fw-bold">
+                    Required Skills
+                </label>
+
+                <textarea
+                    name="required_skills"
+                    class="form-control"
+                    rows="3"
+                >{{ required_skills }}</textarea>
+
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-custom">
+                Match Skills
+            </button>
+
+        </form>
+
+        <!-- RESULT -->
+
+        <div class="result-box">
+
+            <h2 class="text-center mb-4">
+                Matching Result
+            </h2>
+
+            <!-- SCORE -->
 
             <div class="text-center">
-               <button id="analyzeBtn" class="btn btn-custom px-4 py-2">
-    Analyze
-</button> 
+
+                <div class="score">
+                    {{ score }}%
+                </div>
+
             </div>
-        </form>
-        {% if score %}
-<div class="mt-4">
-    <h4 class="text-center">Match Score: {{ score }}%</h4>
 
-    <div class="progress">
-        <div class="progress-bar bg-success"
-            style="width: {{ score }}%;">
+            <!-- PROGRESS BAR -->
+
+            <div class="progress mt-4" style="height:35px;">
+
+                <div
+                    class="progress-bar progress-bar-striped progress-bar-animated"
+                    role="progressbar"
+                    style="width: {{ score }}%;"
+                >
+
+                    {{ score }}%
+
+                </div>
+
+            </div>
+
+            <!-- RECOMMENDATION -->
+
+            <div class="section-title">
+                Hiring Recommendation
+            </div>
+
+            <h3 class="text-success">
+                {{ recommendation }}
+            </h3>
+
+            <!-- STRENGTH -->
+
+            <div class="section-title">
+                Resume Strength
+            </div>
+
+            <h4>
+                {{ strength }}
+            </h4>
+
+            <!-- MATCHED SKILLS -->
+
+            <div class="section-title">
+                Matched Skills
+            </div>
+
+            {% if matched_skills %}
+
+                {% for skill in matched_skills %}
+
+                    <span class="badge bg-success m-1">
+                        {{ skill }}
+                    </span>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p>No matched skills yet</p>
+
+            {% endif %}
+
+            <!-- MISSING SKILLS -->
+
+            <div class="section-title">
+                Missing Skills
+            </div>
+
+            {% if missing_skills %}
+
+                {% for skill in missing_skills %}
+
+                    <span class="badge bg-danger m-1">
+                        {{ skill }}
+                    </span>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p>No missing skills</p>
+
+            {% endif %}
+
+            <!-- RECOMMENDED ROLES -->
+
+            <div class="section-title">
+                Recommended Career Roles
+            </div>
+
+            {% if recommended_roles %}
+
+                <ul>
+
+                    {% for role in recommended_roles %}
+
+                        <li>{{ role }}</li>
+
+                    {% endfor %}
+
+                </ul>
+
+            {% else %}
+
+                <p>No recommended roles</p>
+
+            {% endif %}
+
+            <!-- DETAILS -->
+
+            <div class="section-title">
+                Job Role
+            </div>
+
+            <p>{{ job_role }}</p>
+
+            <div class="section-title">
+                Company Name
+            </div>
+
+            <p>{{ company }}</p>
+
+            <div class="section-title">
+                Job Description
+            </div>
+
+            <p>{{ job_desc }}</p>
+
+            <div class="section-title">
+                Required Skills
+            </div>
+
+            <p>{{ required_skills }}</p>
+
         </div>
-    </div>
-</div>
-{% endif %}
 
     </div>
+
 </div>
+
+<script>
+
+function toggleMode(){
+
+    document.getElementById("body").classList.toggle("dark-mode");
+
+}
+
+</script>
 
 </body>
-<script>
-document.querySelector("form").addEventListener("submit", function() {
-    const btn = document.getElementById("analyzeBtn");
-    btn.innerText = "Analyzing...";
-    btn.disabled = true;
-});
-</script>
 </html>
